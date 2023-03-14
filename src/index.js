@@ -18,7 +18,6 @@ import {
   gitCommit,
   gitPush,
   gitGetRemotes,
-  gitRestoreStaged,
   gitCheckRemote
 } from './git.js'
 import { exitProgram } from './utils.js'
@@ -48,8 +47,10 @@ let files = []
 if (stagedFiles.length === 0 && changedFiles.length > 0) {
   files = await multiselect({
     message: `${colors.yellow('⚠️ No tienes nada para hacer commit.')}
-
-    ${colors.cyan('Selecciona los ficheros que quieres añadir al commit:')}`,
+${colors.gray('│')}
+${colors.gray('│')}  ${colors.cyan(
+      'Selecciona los ficheros que quieres añadir al commit:'
+    )}`,
     options: changedFiles.map((file) => ({
       value: file,
       label: file
@@ -95,9 +96,9 @@ if (release) {
     message: `${colors.cyan(
       '¿Tiene este commit cambios que rompen la compatibilidad anterior?'
     )}
-
-    ${colors.yellow(
-      'Si la respuestra es sí, deberías crear un commit con el tipo "BREAKING CHANGE" y al hacer release se publicara una versión major'
+${colors.gray('│')}
+${colors.gray('│')}  ${colors.yellow(
+      'Si la respuestra es sí, deberías crear un commit con el tipo "BREAKING CHANGE"'
     )}`
   })
 
@@ -110,23 +111,19 @@ commit = breakingChange ? `${commit} [breaking change]` : commit
 const shouldContinue = await confirm({
   initialValue: true,
   message: `¿Quieres crear el commit con el siquiente mensaje?
-
-  ${colors.green(colors.bold(commit))}
-
-  ${colors.cyan('¿Confirmas?')}`
+${colors.gray('│')}  
+${colors.gray('│')}  ${colors.green(colors.bold(commit))}
+${colors.gray('│')}  
+${colors.gray('│')}  ${colors.cyan('¿Confirmas?')}`
 })
 
 if (isCancel(shouldContinue)) exitProgram({ files })
 
-if (!shouldContinue) {
-  gitRestoreStaged({ files })
-  outro(colors.yellow('⚠️ No se ha creado el commit'))
-  process.exit(0)
-}
+if (!shouldContinue) exitProgram({ code: 0, files, message: '⚠️ No se ha creado el commit' })
 
 await gitCommit({ commit })
 
-console.log('✅ Commit creado con éxito')
+console.log(`${colors.gray('│')}  ✔️ Commit creado con éxito`)
 
 const gitRemotes = await gitGetRemotes()
 
@@ -168,4 +165,4 @@ if (shouldPushCommit) {
   await gitPush(gitRemote)
 }
 
-outro(colors.green('✔️ ¡Gracia por usar el asistente!'))
+outro(colors.green('✅ ¡Gracia por usar el asistente!'))

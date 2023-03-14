@@ -19,6 +19,11 @@ export const COMMIT_TYPES = {
     description: 'Refactor code',
     release: true
   },
+  style: {
+    emoji: '🖌️',
+    description: 'Changes to the style or formatting of the code',
+    release: false
+  },
   docs: {
     emoji: '📚',
     description: 'Add or update documentation',
