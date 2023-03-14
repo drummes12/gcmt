@@ -30,6 +30,11 @@ if (errorChangedFiles ?? errorStagedFiles) {
   process.exit(1)
 }
 
+if (stagedFiles.length === 0 && changedFiles.length === 0) {
+  outro(colors.red('❌ Nada para hacer commit'))
+  process.exit(1)
+}
+
 if (stagedFiles.length === 0 && changedFiles.length > 0) {
   const files = await multiselect({
     message: `${colors.yellow('⚠️ No tienes nada para hacer commit.')}
