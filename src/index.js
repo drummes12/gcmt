@@ -11,7 +11,16 @@ import {
 import colors from 'picocolors'
 
 import { COMMIT_TYPES } from './commit-types.js'
-import { getChangedFiles, getStagedFiles, gitAdd, gitCommit } from './git.js'
+import {
+  getChangedFiles,
+  getStagedFiles,
+  gitAdd,
+  gitCommit,
+  gitPush,
+  gitGetRemotes,
+  gitRestoreStaged,
+  gitCheckRemote
+} from './git.js'
 import { exitProgram } from './utils.js'
 
 intro(
@@ -39,7 +48,7 @@ let files = []
 if (stagedFiles.length === 0 && changedFiles.length > 0) {
   files = await multiselect({
     message: `${colors.yellow('⚠️ No tienes nada para hacer commit.')}
-    
+
     ${colors.cyan('Selecciona los ficheros que quieres añadir al commit:')}`,
     options: changedFiles.map((file) => ({
       value: file,
@@ -86,7 +95,7 @@ if (release) {
     message: `${colors.cyan(
       '¿Tiene este commit cambios que rompen la compatibilidad anterior?'
     )}
-    
+
     ${colors.yellow(
       'Si la respuestra es sí, deberías crear un commit con el tipo "BREAKING CHANGE" y al hacer release se publicara una versión major'
     )}`
@@ -110,10 +119,53 @@ const shouldContinue = await confirm({
 if (isCancel(shouldContinue)) exitProgram({ files })
 
 if (!shouldContinue) {
+  gitRestoreStaged({ files })
   outro(colors.yellow('⚠️ No se ha creado el commit'))
   process.exit(0)
 }
 
 await gitCommit({ commit })
 
-outro(colors.green('✔️ Commit creado con éxito ¡Gracia por usar el asistente!'))
+console.log('✅ Commit creado con éxito')
+
+const gitRemotes = await gitGetRemotes()
+
+let gitRemote = ''
+if (gitRemotes.length > 1) {
+  gitRemote = await select({
+    message: colors.cyan('Selecciona el repositorio remoto:'),
+    options: gitRemotes.map((remote) => ({
+      value: remote,
+      label: remote
+    }))
+  })
+  if (isCancel(gitRemote)) exitProgram()
+} else {
+  gitRemote = gitRemotes[0]
+}
+
+const [, errorCheckRemote] = await trytm(gitCheckRemote(gitRemote))
+
+if (errorCheckRemote) {
+  outro(
+    colors.yellow(
+      '⚠️ Por favor asegúrate de que tengas los permisos de acceso correctos para hacer push'
+    )
+  )
+  process.exit(1)
+}
+
+const shouldPushCommit = await confirm({
+  initialValue: true,
+  message: colors.cyan(
+    `🚀 ¿Quieres hacer push de este commit a ${colors.yellow(gitRemote)}?`
+  )
+})
+
+if (isCancel(shouldPushCommit)) exitProgram()
+
+if (shouldPushCommit) {
+  await gitPush(gitRemote)
+}
+
+outro(colors.green('✔️ ¡Gracia por usar el asistente!'))
