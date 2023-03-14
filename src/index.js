@@ -123,7 +123,7 @@ if (!shouldContinue) exitProgram({ code: 0, files, message: '⚠️ No se ha cre
 
 await gitCommit({ commit })
 
-console.log(`${colors.gray('│')}  ✔️ Commit creado con éxito`)
+console.log(`${colors.green('▶')}  Commit creado con éxito`)
 
 const gitRemotes = await gitGetRemotes()
 
