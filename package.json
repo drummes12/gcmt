@@ -1,17 +1,26 @@
 {
   "name": "gcmt",
   "version": "1.0.0",
-  "description": "",
+  "description": "Help you to create commits easier",
   "type": "module",
+  "bin": {
+    "gcmt": "./src/bin.js"
+  },
   "main": "index.js",
   "scripts": {
+    "gcmt": "gcmt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "git",
+    "commit",
+    "semmantic"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "standard": "^17.0.0"
+    "gcmt": "file://.",
+    "standard": "17.0.0"
   },
   "eslintConfig": {
     "extends": "standard"

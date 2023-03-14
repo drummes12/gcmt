@@ -1,16 +1,18 @@
+import { trytm } from '@bdsqqq/try'
 import {
-  intro,
-  outro,
-  text,
-  select,
   confirm,
-  multiselect
+  intro,
+  isCancel,
+  multiselect,
+  outro,
+  select,
+  text
 } from '@clack/prompts'
 import colors from 'picocolors'
-import { trytm } from '@bdsqqq/try'
 
 import { COMMIT_TYPES } from './commit-types.js'
 import { getChangedFiles, getStagedFiles, gitAdd, gitCommit } from './git.js'
+import { exitProgram } from './utils.js'
 
 intro(
   colors.inverse(
@@ -39,6 +41,8 @@ if (stagedFiles.length === 0 && changedFiles.length > 0) {
     }))
   })
 
+  if (isCancel(files)) exitProgram()
+
   await gitAdd({ files })
 }
 
@@ -49,6 +53,8 @@ const commitType = await select({
     label: `${value.emoji} ${key.padEnd(8, ' ')} • ${value.description}`
   }))
 })
+
+if (isCancel(commitType)) exitProgram()
 
 const commitMessage = await text({
   message: colors.cyan('Introduce el mensaje del commit:'),
@@ -63,6 +69,8 @@ const commitMessage = await text({
   }
 })
 
+if (isCancel(commitMessage)) exitProgram()
+
 const { emoji, release } = COMMIT_TYPES[commitType]
 
 let breakingChange = false
@@ -74,9 +82,11 @@ if (release) {
     )}
     
     ${colors.yellow(
-  'Si la respuestra es sí, deberías crear un commit con el tipo "BREAKING CHANGE" y al hacer release se publicara una versión major'
-)}`
+      'Si la respuestra es sí, deberías crear un commit con el tipo "BREAKING CHANGE" y al hacer release se publicara una versión major'
+    )}`
   })
+
+  if (isCancel(breakingChange)) exitProgram()
 }
 
 let commit = `${emoji} ${commitType}: ${commitMessage}`
@@ -90,6 +100,8 @@ const shouldContinue = await confirm({
 
   ${colors.cyan('¿Confirmas?')}`
 })
+
+if (isCancel(shouldContinue)) exitProgram()
 
 if (!shouldContinue) {
   outro(colors.yellow('⚠️ No se ha creado el commit'))
