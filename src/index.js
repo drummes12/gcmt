@@ -35,8 +35,9 @@ if (stagedFiles.length === 0 && changedFiles.length === 0) {
   process.exit(1)
 }
 
+let files = []
 if (stagedFiles.length === 0 && changedFiles.length > 0) {
-  const files = await multiselect({
+  files = await multiselect({
     message: `${colors.yellow('⚠️ No tienes nada para hacer commit.')}
     
     ${colors.cyan('Selecciona los ficheros que quieres añadir al commit:')}`,
@@ -46,7 +47,7 @@ if (stagedFiles.length === 0 && changedFiles.length > 0) {
     }))
   })
 
-  if (isCancel(files)) exitProgram()
+  if (isCancel(files)) exitProgram({ files })
 
   await gitAdd({ files })
 }
@@ -59,7 +60,7 @@ const commitType = await select({
   }))
 })
 
-if (isCancel(commitType)) exitProgram()
+if (isCancel(commitType)) exitProgram({ files })
 
 const commitMessage = await text({
   message: colors.cyan('Introduce el mensaje del commit:'),
@@ -74,7 +75,7 @@ const commitMessage = await text({
   }
 })
 
-if (isCancel(commitMessage)) exitProgram()
+if (isCancel(commitMessage)) exitProgram({ files })
 
 const { emoji, release } = COMMIT_TYPES[commitType]
 
@@ -91,7 +92,7 @@ if (release) {
     )}`
   })
 
-  if (isCancel(breakingChange)) exitProgram()
+  if (isCancel(breakingChange)) exitProgram({ files })
 }
 
 let commit = `${emoji} ${commitType}: ${commitMessage}`
@@ -106,7 +107,7 @@ const shouldContinue = await confirm({
   ${colors.cyan('¿Confirmas?')}`
 })
 
-if (isCancel(shouldContinue)) exitProgram()
+if (isCancel(shouldContinue)) exitProgram({ files })
 
 if (!shouldContinue) {
   outro(colors.yellow('⚠️ No se ha creado el commit'))
@@ -115,4 +116,4 @@ if (!shouldContinue) {
 
 await gitCommit({ commit })
 
-outro('✔️ Commit creado con éxito ¡Gracia por usar el asistente!')
+outro(colors.green('✔️ Commit creado con éxito ¡Gracia por usar el asistente!'))

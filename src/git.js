@@ -27,3 +27,9 @@ export async function gitAdd ({ files = [] } = {}) {
   const { stdout } = await execAsync(`git add ${filesLine}`)
   return cleanStdout(stdout)
 }
+
+export async function gitRestoreStaged ({ files = [] } = {}) {
+  const filesLine = files.join(' ')
+  const { stdout } = await execAsync(`git restore --staged ${filesLine}`)
+  return cleanStdout(stdout)
+}
