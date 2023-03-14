@@ -34,15 +34,20 @@ export async function gitRestoreStaged ({ files = [] } = {}) {
   return cleanStdout(stdout)
 }
 
-export async function gitCheckRemote () {
-  const { stdout } = await execAsync('git ls-remote --get-url')
+export async function gitGetRemotes () {
+  const { stdout } = await execAsync('git remote show')
   return cleanStdout(stdout)
 }
 
-export async function gitPush () {
+export async function gitCheckRemote (remote) {
+  const { stdout } = await execAsync(`git remote show ${remote}`)
+  return cleanStdout(stdout)
+}
+
+export async function gitPush (remote) {
   const { stdout } = await execAsync(`
     CURRENT_BRANCH=$(git branch --show-current) 
-    git push origin "$CURRENT_BRANCH"
+    git push ${remote} "$CURRENT_BRANCH"
   `)
   return cleanStdout(stdout)
 }
