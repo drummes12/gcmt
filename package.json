@@ -1,6 +1,6 @@
 {
   "name": "gcmt",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Help you to create commits easier",
   "type": "module",
   "bin": {
