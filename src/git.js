@@ -17,14 +17,14 @@ export async function getStagedFiles () {
   return cleanStdout(stdout)
 }
 
-export async function gitCommit ({ commit } = {}) {
-  const { stdout } = await execAsync(`git commit -m "${commit}"`)
-  return cleanStdout(stdout)
-}
-
 export async function gitAdd ({ files = [] } = {}) {
   const filesLine = files.join(' ')
   const { stdout } = await execAsync(`git add ${filesLine}`)
+  return cleanStdout(stdout)
+}
+
+export async function gitCommit ({ commit } = {}) {
+  const { stdout } = await execAsync(`git commit -m "${commit}"`)
   return cleanStdout(stdout)
 }
 
@@ -44,10 +44,12 @@ export async function gitCheckRemote (remote) {
   return cleanStdout(stdout)
 }
 
-export async function gitPush (remote) {
-  const { stdout } = await execAsync(`
-    CURRENT_BRANCH=$(git branch --show-current) 
-    git push ${remote} "$CURRENT_BRANCH"
-  `)
+export async function gitCurrentBranch () {
+  const { stdout } = await execAsync('git branch --show-current')
+  return cleanStdout(stdout)
+}
+
+export async function gitPush (remote, branch) {
+  const { stdout } = await execAsync(`git push ${remote} ${branch}`)
   return cleanStdout(stdout)
 }

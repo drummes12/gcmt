@@ -18,7 +18,8 @@ import {
   gitCommit,
   gitPush,
   gitGetRemotes,
-  gitCheckRemote
+  gitCheckRemote,
+  gitCurrentBranch
 } from './git.js'
 import { exitProgram } from './utils.js'
 
@@ -58,8 +59,15 @@ ${colors.gray('│')}  ${colors.cyan(
   })
 
   if (isCancel(files)) exitProgram({ files })
+}
+const [, errorAddFiles] = await trytm(gitAdd({ files }))
 
-  await gitAdd({ files })
+if (errorAddFiles) {
+  exitProgram({
+    files,
+    message:
+      '❌ Error al añadir archivos, revisa que estes en la carpeta raiz de Git'
+  })
 }
 
 const commitType = await select({
@@ -119,7 +127,9 @@ ${colors.gray('│')}  ${colors.cyan('¿Confirmas?')}`
 
 if (isCancel(shouldContinue)) exitProgram({ files })
 
-if (!shouldContinue) exitProgram({ code: 0, files, message: '⚠️ No se ha creado el commit' })
+if (!shouldContinue) {
+  exitProgram({ code: 0, files, message: '⚠️ No se ha creado el commit' })
+}
 
 await gitCommit({ commit })
 
@@ -152,17 +162,21 @@ if (errorCheckRemote) {
   process.exit(1)
 }
 
+const currentBranch = gitCurrentBranch()
+
 const shouldPushCommit = await confirm({
   initialValue: true,
   message: colors.cyan(
-    `🚀 ¿Quieres hacer push de este commit a ${colors.yellow(gitRemote)}?`
+    `🚀 ¿Quieres hacer push de este commit a ${colors.yellow(
+      gitRemote
+    )} en la rama ${colors.yellow(currentBranch)}?`
   )
 })
 
 if (isCancel(shouldPushCommit)) exitProgram()
 
 if (shouldPushCommit) {
-  await gitPush(gitRemote)
+  await gitPush(gitRemote, currentBranch)
 }
 
 outro(colors.green('✅ ¡Gracia por usar el asistente!'))
