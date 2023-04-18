@@ -162,7 +162,7 @@ if (errorCheckRemote) {
   process.exit(1)
 }
 
-const currentBranch = gitCurrentBranch()
+const currentBranch = await gitCurrentBranch()
 
 const shouldPushCommit = await confirm({
   initialValue: true,
